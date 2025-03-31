@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encryption & Decryption</title>
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(to right, #141e30, #243b55); text-align: center; color: white; padding-top: 50px; }
+        .container { max-width: 600px; margin: auto; padding: 20px; background: rgba(255, 255, 255, 0.1); box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3); border-radius: 10px; backdrop-filter: blur(10px); }
+        input, button { margin: 10px; padding: 12px; font-size: 16px; border-radius: 5px; border: none; outline: none; }
+        input { width: 80%; background: rgba(255, 255, 255, 0.2); color: white; text-align: center; }
+        input::placeholder { color: #ddd; }
+        button { background-color: #4CAF50; color: white; cursor: pointer; transition: transform 0.3s, background-color 0.3s; }
+        button:hover { background-color: #45a049; transform: scale(1.1); }
+        .error { color: red; font-weight: bold; }
+        .popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); opacity: 0; width: 80%; max-width: 500px; background: rgba(0, 0, 0, 0.9); color: white; padding: 20px; box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5); border-radius: 10px; transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out; }
+        .popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        .popup .close { position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 24px; font-weight: bold; color: red; transition: transform 0.2s; }
+        .popup .close:hover { transform: scale(1.2); }
+        .popup h3 { margin-top: 0; }
+        .copy-btn { margin-left: 10px; background-color: #ff9800; transition: transform 0.2s; }
+        .copy-btn:hover { background-color: #e68900; transform: scale(1.1); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔐 Encryption & Decryption</h2>
+        <input type="text" id="message" placeholder="Enter your message" required>
+        <input type="number" id="shift" min="1" max="25" placeholder="Shift (1-25)" required>
+        <button onclick="encryptText()">Encrypt</button>
+        <button onclick="decryptText()">Decrypt</button>
+        <p id="result"></p>
+        <button class="copy-btn" onclick="copyResult()">📋 Copy</button>
+        <p class="error" id="error-msg"></p>
+        <button onclick="openPopup('discussion-popup')">💬 Discussion Board</button>
+        <button onclick="openPopup('video-popup')">📺 Videos</button>
+    </div>
+
+    <div id="discussion-popup" class="popup">
+        <span class="close" onclick="closePopup('discussion-popup')">&times;</span>
+        <h3>Discussion Board</h3>
+        <h3>1. Why is encryption important?</h3>
+        <p>
+            Encryption is crucial for protecting sensitive information in the digital world. It ensures data confidentiality by converting readable information (plaintext) into unreadable code (ciphertext) that can only be decrypted with a specific key. This prevents unauthorized access, protects privacy, and ensures secure communication, especially in areas like online banking, healthcare, and personal communications. Without encryption, sensitive data would be vulnerable to interception, theft, or manipulation by malicious actors.
+        </p>
+    
+        <h3>2. Can encryption be misused?</h3>
+        <p>
+            Yes, encryption can be misused in certain cases. While its primary purpose is to protect data, malicious individuals or organizations can use encryption to hide illegal activities, making it difficult for law enforcement to access critical information. For example, criminals may encrypt communications or data to avoid detection, or ransomware attacks may encrypt victims' data, locking them out until a ransom is paid. Additionally, poor implementation or weak encryption algorithms can lead to vulnerabilities, making the system easier to crack.
+        </p>
+    
+        <h3>3. What are some real-life concerns about encryption?</h3>
+        <p>
+            Some real-life concerns about encryption revolve around privacy and security. On one hand, there is the need to protect individuals' privacy and secure sensitive data. On the other hand, governments and law enforcement agencies sometimes call for "backdoors" in encryption systems to fight crime and terrorism, which raises privacy concerns. Such backdoors could be exploited by hackers if not properly controlled. Additionally, there are concerns about outdated encryption algorithms, which, if not upgraded, can leave systems vulnerable to attacks. The balance between security and accessibility remains a significant challenge in the encryption debate.
+        </p>
+    </div>
+
+    <div id="video-popup" class="popup">
+        <span class="close" onclick="closePopup('video-popup')">&times;</span>
+        <h3>Related Videos</h3>
+            <!-- Embed the first YouTube video -->
+            <iframe width="80%" height="150" 
+                src="https://www.youtube.com/embed/9u6sovgxiH4" 
+                title="YouTube video player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        
+            <br><br> <!-- Spacing between videos -->
+        
+            <!-- Embed the second YouTube video -->
+            <iframe width="80%" height="150" 
+                src="https://www.youtube.com/embed/J1RmZZEkN0k" 
+                title="YouTube video player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        
+            <br><br> <!-- Spacing between videos -->
+        
+            <!-- Embed the third YouTube video -->
+            <iframe width="80%" height="150" 
+                src="https://www.youtube.com/embed/4KiwoeDJFiA" 
+                title="YouTube video player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+    <script>
+        function encryptText() {
+            let message = document.getElementById("message").value;
+            let shift = parseInt(document.getElementById("shift").value);
+            if (!message || isNaN(shift) || shift < 1 || shift > 25) {
+                document.getElementById("error-msg").innerText = "Please enter a valid message and shift value (1-25).";
+                return;
+            }
+            document.getElementById("error-msg").innerText = "";
+            let result = message.split('').map(char => {
+                if (char.match(/[a-z]/i)) {
+                    let code = char.charCodeAt(0);
+                    let base = code >= 65 && code <= 90 ? 65 : 97;
+                    return String.fromCharCode(((code - base + shift) % 26) + base);
+                }
+                return char;
+            }).join('');
+            document.getElementById("result").innerText = result;
+        }
+
+        function decryptText() {
+            let message = document.getElementById("message").value;
+            let shift = parseInt(document.getElementById("shift").value);
+            if (!message || isNaN(shift) || shift < 1 || shift > 25) {
+                document.getElementById("error-msg").innerText = "Please enter a valid message and shift value (1-25).";
+                return;
+            }
+            document.getElementById("error-msg").innerText = "";
+            let result = message.split('').map(char => {
+                if (char.match(/[a-z]/i)) {
+                    let code = char.charCodeAt(0);
+                    let base = code >= 65 && code <= 90 ? 65 : 97;
+                    return String.fromCharCode(((code - base - shift + 26) % 26) + base);
+                }
+                return char;
+            }).join('');
+            document.getElementById("result").innerText = result;
+        }
+
+        function copyResult() {
+            let resultText = document.getElementById("result").innerText;
+            navigator.clipboard.writeText(resultText).then(() => {
+                alert("Copied to clipboard!");
+            });
+        }
+
+        function openPopup(id) {
+            let popup = document.getElementById(id);
+            popup.style.display = "block";
+            setTimeout(() => {
+                popup.classList.add("show");
+            }, 10);
+        }
+
+        function closePopup(id) {
+            let popup = document.getElementById(id);
+            popup.classList.remove("show");
+            setTimeout(() => {
+                popup.style.display = "none";
+            }, 400);
+        }
+    </script>
+</body>
+</html>
