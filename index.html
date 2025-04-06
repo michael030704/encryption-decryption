@@ -5,21 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🔐Encryption & Decryption By Michael Saragena</title>
     <style>
-        body { font-family: 'Poppins', sans-serif; background: linear-gradient(to right, #141e30, #243b55); text-align: center; color: white; padding-top: 50px; }
-        .container { max-width: 600px; margin: auto; padding: 20px; background: rgba(255, 255, 255, 0.1); box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3); border-radius: 10px; backdrop-filter: blur(10px); }
-        input, button { margin: 10px; padding: 12px; font-size: 16px; border-radius: 5px; border: none; outline: none; }
-        input { width: 80%; background: rgba(255, 255, 255, 0.2); color: white; text-align: center; }
-        input::placeholder { color: #ddd; }
-        button { background-color: #4CAF50; color: white; cursor: pointer; transition: transform 0.3s, background-color 0.3s; }
-        button:hover { background-color: #45a049; transform: scale(1.1); }
-        .error { color: red; font-weight: bold; }
-        .popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); opacity: 0; width: 80%; max-width: 500px; background: rgba(0, 0, 0, 0.9); color: white; padding: 20px; box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5); border-radius: 10px; transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out; }
-        .popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        .popup .close { position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 24px; font-weight: bold; color: red; transition: transform 0.2s; }
-        .popup .close:hover { transform: scale(1.2); }
-        .popup h3 { margin-top: 0; }
-        .copy-btn { margin-left: 10px; background-color: #ff9800; transition: transform 0.2s; }
-        .copy-btn:hover { background-color: #e68900; transform: scale(1.1); }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #141e30, #243b55);
+            text-align: center;
+            color: white;
+            padding-top: 50px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        input, button {
+            margin: 10px;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+        }
+        input {
+            width: 80%;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-align: center;
+        }
+        input::placeholder {
+            color: #ddd;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.1);
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0;
+            width: 80%;
+            max-width: 500px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+        }
+        .popup.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        .popup .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            color: red;
+            transition: transform 0.2s;
+        }
+        .popup .close:hover {
+            transform: scale(1.2);
+        }
+        .popup h3 {
+            margin-top: 0;
+        }
+        .copy-btn {
+            margin-left: 10px;
+            background-color: #ff9800;
+            transition: transform 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: #e68900;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -31,11 +108,12 @@
         <button onclick="decryptText()">Decrypt</button>
         <p id="result"></p>
         <button class="copy-btn" onclick="copyResult()">📋 Copy</button>
+        <p class="error" id="copy-msg"></p>
         <p class="error" id="error-msg"></p>
         <button onclick="openPopup('discussion-popup')">💬 Discussion Board</button>
         <button onclick="openPopup('video-popup')">📺 Videos</button>
     </div>
-
+    
     <div id="discussion-popup" class="popup">
         <span class="close" onclick="closePopup('discussion-popup')">&times;</span>
         <h3>Discussion Board</h3>
@@ -90,14 +168,32 @@
             </iframe>
         </div>
     <script>
+        function validateMessage() {
+            let message = document.getElementById("message").value.trim();
+            if (message === "") {
+                document.getElementById("error-msg").innerText = "Please enter a message.";
+                return false;
+            }
+            return true;
+        }
+
+        function validateShift() {
+            let shift = parseInt(document.getElementById("shift").value);
+            if (isNaN(shift) || shift < 1 || shift > 25) {
+                document.getElementById("error-msg").innerText = "Shift must be a number between 1 and 25.";
+                return false;
+            }
+            return true;
+        }
+
         function encryptText() {
+            if (!validateMessage() || !validateShift()) return;
+
+            document.getElementById("error-msg").innerText = "";
+            document.getElementById("copy-msg").innerText = "";
+
             let message = document.getElementById("message").value;
             let shift = parseInt(document.getElementById("shift").value);
-            if (!message || isNaN(shift) || shift < 1 || shift > 25) {
-                document.getElementById("error-msg").innerText = "Please enter a valid message and shift value (1-25).";
-                return;
-            }
-            document.getElementById("error-msg").innerText = "";
             let result = message.split('').map(char => {
                 if (char.match(/[a-z]/i)) {
                     let code = char.charCodeAt(0);
@@ -110,13 +206,13 @@
         }
 
         function decryptText() {
+            if (!validateMessage() || !validateShift()) return;
+
+            document.getElementById("error-msg").innerText = "";
+            document.getElementById("copy-msg").innerText = "";
+
             let message = document.getElementById("message").value;
             let shift = parseInt(document.getElementById("shift").value);
-            if (!message || isNaN(shift) || shift < 1 || shift > 25) {
-                document.getElementById("error-msg").innerText = "Please enter a valid message and shift value (1-25).";
-                return;
-            }
-            document.getElementById("error-msg").innerText = "";
             let result = message.split('').map(char => {
                 if (char.match(/[a-z]/i)) {
                     let code = char.charCodeAt(0);
@@ -129,9 +225,21 @@
         }
 
         function copyResult() {
-            let resultText = document.getElementById("result").innerText;
+            let resultText = document.getElementById("result").innerText.trim();
+            let copyMsg = document.getElementById("copy-msg");
+
+            if (resultText === "") {
+                copyMsg.style.color = "red";
+                copyMsg.innerText = "⚠️ No text to copy.";
+                return;
+            }
+
             navigator.clipboard.writeText(resultText).then(() => {
-                alert("Copied to clipboard!");
+                copyMsg.style.color = "lightgreen";
+                copyMsg.innerText = "✅ Copied to clipboard!📋 Paste it to the message to decrypt";
+            }).catch(() => {
+                copyMsg.style.color = "red";
+                copyMsg.innerText = "❌ Failed to copy.";
             });
         }
 
